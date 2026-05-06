@@ -84,6 +84,75 @@ class CDSLoading extends LitElement {
   @property({ type: Boolean, reflect: true })
   active = false;
 
+  private _launcher: Element | null = null;
+
+  private _trapActive = false;
+
+  private _handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+    }
+  };
+
+  private _activateTrap() {
+    this._launcher = this.ownerDocument?.activeElement ?? null;
+    this.setAttribute('role', 'dialog');
+    this.setAttribute('aria-modal', 'true');
+    this.setAttribute('aria-label', this.description);
+    this.setAttribute('tabindex', '-1');
+    this.ownerDocument?.addEventListener('keydown', this._handleKeyDown, true);
+    this._trapActive = true;
+    setTimeout(() => {
+      if (this.isConnected && this._trapActive) {
+        this.focus();
+      }
+    }, 0);
+  }
+
+  private _deactivateTrap() {
+    this.ownerDocument?.removeEventListener(
+      'keydown',
+      this._handleKeyDown,
+      true
+    );
+    this._trapActive = false;
+    this.removeAttribute('role');
+    this.removeAttribute('aria-modal');
+    this.removeAttribute('aria-label');
+    this.removeAttribute('tabindex');
+
+    if (
+      this._launcher &&
+      typeof (this._launcher as HTMLElement).focus === 'function'
+    ) {
+      (this._launcher as HTMLElement).focus();
+    }
+    this._launcher = null;
+  }
+
+  disconnectedCallback() {
+    if (this._trapActive) {
+      this._deactivateTrap();
+    }
+    super.disconnectedCallback();
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+
+    const trapActive = this.active && this.overlay;
+
+    if (changedProperties.has('active') || changedProperties.has('overlay')) {
+      if (trapActive && !this._trapActive) {
+        this._activateTrap();
+      } else if (!trapActive && this._trapActive) {
+        this._deactivateTrap();
+      }
+    } else if (trapActive && changedProperties.has('description')) {
+      this.setAttribute('aria-label', this.description);
+    }
+  }
+
   render() {
     const { active, description, small, overlay } = this;
 

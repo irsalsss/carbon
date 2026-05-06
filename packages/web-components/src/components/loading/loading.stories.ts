@@ -7,6 +7,9 @@
 
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
+import '../button';
+import './index';
+import CDSLoading from './loading';
 
 const defaultArgs = {
   inactive: false,
@@ -58,6 +61,56 @@ export const Default = {
       ?small=${small}
       ?overlay=${withOverlay}></cds-loading>
   `,
+};
+
+export const UXExample = {
+  args: {
+    ...defaultArgs,
+    active: false,
+    withOverlay: true,
+  },
+  argTypes: controls,
+  render: ({
+    active,
+    inactive,
+    assistiveText,
+    description,
+    type,
+    withOverlay,
+    small,
+  }) => {
+    const startLoading = () => {
+      const loading = document.getElementById(
+        'ux-loading'
+      ) as CDSLoading | null;
+      if (loading) {
+        loading.active = true;
+      }
+    };
+    const stopLoading = () => {
+      const loading = document.getElementById(
+        'ux-loading'
+      ) as CDSLoading | null;
+      if (loading) {
+        loading.active = false;
+      }
+    };
+    return html`
+      <div style="display: flex; gap: 1rem; position: relative;">
+        <cds-button @click=${startLoading}>Start</cds-button>
+        <cds-button @click=${stopLoading}>Stop</cds-button>
+      </div>
+      <cds-loading
+        id="ux-loading"
+        ?inactive=${inactive}
+        ?active=${active}
+        description=${description}
+        assistive-text=${assistiveText}
+        type=${ifDefined(type)}
+        ?small=${small}
+        ?overlay=${withOverlay}></cds-loading>
+    `;
+  },
 };
 
 const meta = {

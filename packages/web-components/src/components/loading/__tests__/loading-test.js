@@ -112,6 +112,51 @@ describe('cds-loading', function () {
       const svgElement = el.shadowRoot.querySelector('svg');
       expect(svgElement).to.exist;
     });
+
+    it('should trap focus and prevent default tab action when active and overlay is true', async () => {
+      const el = await fixture(
+        html`<cds-loading overlay active></cds-loading>`
+      );
+      // Wait for updated/setTimeout
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        bubbles: true,
+        cancelable: true,
+      });
+      const prevented = !document.dispatchEvent(event);
+      expect(prevented).to.be.true;
+    });
+
+    it('should focus the host element when active and overlay is true', async () => {
+      const el = await fixture(
+        html`<cds-loading overlay active></cds-loading>`
+      );
+      // Wait for updated/setTimeout
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(document.activeElement).to.equal(el);
+    });
+
+    it('should restore focus to the previously focused element when deactivated', async () => {
+      const button = await fixture(html`<button>Focus me</button>`);
+      button.focus();
+      expect(document.activeElement).to.equal(button);
+
+      const el = await fixture(
+        html`<cds-loading overlay active></cds-loading>`
+      );
+      // Wait for updated/setTimeout
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(document.activeElement).to.equal(el);
+
+      el.active = false;
+      await el.updateComplete;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(document.activeElement).to.equal(button);
+    });
   });
 
   describe('SVG structure', () => {

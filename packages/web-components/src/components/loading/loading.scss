@@ -22,6 +22,10 @@ $css--plex: true !default;
 
   // Avoids duplicate animation of the host and the `.#{$prefix}--loading` in the shadow DOM
   animation: none;
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 :host(#{$prefix}-loading[small]) {
@@ -30,6 +34,10 @@ $css--plex: true !default;
 
 :host(#{$prefix}-loading:not([active])) {
   @extend .#{$prefix}--loading--stop;
+}
+
+:host(#{$prefix}-loading[overlay]:not([active])) {
+  @extend .#{$prefix}--loading-overlay--stop;
 }
 
 .#{$prefix}--loading__background[hidden] {
